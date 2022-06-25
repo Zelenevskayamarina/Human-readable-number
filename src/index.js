@@ -3,7 +3,7 @@
 module.exports = function toReadable(number) {
     let result = '';
 
-    let simple = {
+    let single = {
         0: 'zero',
         1: 'one',
         2: 'two',
@@ -26,7 +26,7 @@ module.exports = function toReadable(number) {
         19: 'nineteen',
     };
 
-    let decimal = {
+    let double = {
         2: 'twenty',
         3: 'thirty',
         4: 'forty',
@@ -37,35 +37,30 @@ module.exports = function toReadable(number) {
         9: 'ninety'
     };
 
-    let pointH = Math.floor(number / 100);
-    let pointD = Math.floor(number / 10 - pointH * 10);
-    let pointS = number - pointH * 100 - pointD * 10;
-    let pointT = pointD * 10 + pointS;
+    let hundreds = Math.floor(number / 100);
+    let dozens = Math.floor(number / 10 - hundreds * 10);
+    let units = number - hundreds * 100 - dozens * 10;
+    let point = dozens * 10 + units;
 
     if (number >= 0 && number <= 19) {
-        result = simple[number];
-    }
-    if (number >= 20 && number <= 99) {
-        if (pointS != 0) {
-            result = decimal[pointD] + ' ' + simple[pointS];
-        } else {
-            result = decimal[pointD];
+        result = single[number];
+    } else if (number >= 20 && number <= 99) {
+        if (Number.isInteger(number / 10)) {
+            result = double[dozens];
+        } else result = double[dozens] + ' ' + single[units];
+    } else if (number >= 100) {
+        if (Number.isInteger(number / 100)) {
+            result = single[hundreds] + ' ' + 'hundred';
+        } else if (point > 0 && point <= 19) {
+            result = single[hundreds] + ' ' + 'hundred' + ' ' + single[point];
         }
+        else if (units == 0 && point >= 20 && point <= 99) {
+            result = single[hundreds] + ' ' + 'hundred' + ' ' + double[dozens];
+        } 
+        else if (units != 0 && point >= 20 && point <= 99) {
+            result = single[hundreds] + ' ' + 'hundred' + ' ' + double[dozens] + ' ' + single[units];
+        } 
     }
 
-    if (number >= 100) {
-        if (pointS != 0 && pointT >= 20 && pointT <= 99) {
-            result = simple[pointH] + ' ' + 'hundred' + ' ' + decimal[pointD] + ' ' + simple[pointS];
-        }
-        else if (pointS == 0 && pointT >=20 && pointT <= 99) {
-            result = simple[pointH] + ' ' + 'hundred' + ' ' + decimal[pointD];
-        }
-        else if (0 < pointT && pointT <= 19) {
-            result = simple[pointH] + ' ' + 'hundred' + ' ' + simple[pointT];
-        }
-        else {
-            result = simple[pointH] + ' ' + 'hundred';
-        }
-    }
     return result;
 }
